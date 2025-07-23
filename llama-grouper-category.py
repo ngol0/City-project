@@ -61,13 +61,9 @@ def group_labels_by_criterion(annotations_per_image):
     """
     grouped = defaultdict(set)
 
-    # get the first 3000 images
     for i, annotations in enumerate(annotations_per_image.values()):
-        # if i >= 2000: 
-        #     break
         for criterion, label in annotations.items():
             cleaned_label = label.strip().rstrip('.')
-            #if cleaned_label:
             if cleaned_label and not any(x in cleaned_label.lower() for x in ["no ", "unknown "]):
                 grouped[criterion].add(cleaned_label)
     return grouped
@@ -77,9 +73,9 @@ def generate_prompt(criterion, labels):
     Formats the full prompt using the template with the criterion and its labels.
     """
     label_list = "\n".join(f'* "{label}"' for label in labels)
-    return PROMPT_TEMPLATE.replace("{CRITERION}", criterion).replace("{MIDDLE_GRAINED_CATEGORY_NAME}", label_list)
+    return PROMPT_TEMPLATE.format(CRITERION=criterion, MIDDLE_GRAINED_CATEGORY_NAME=label_list)
 
-def query_llm(prompt, tokens):
+def query_llm(prompt):
     """
     Queries the model and returns the decoded output.
     """
@@ -93,7 +89,7 @@ def query_llm(prompt, tokens):
     with torch.no_grad():
         outputs = model.generate(
             **inputs,
-            max_new_tokens=tokens,           
+            max_new_tokens=3000,           
             temperature=None,               
             do_sample=False,
             #top_k=40,   
@@ -122,15 +118,13 @@ def discover_labels_and_save(grouped_labels):
 
         print(f"[{i+1}/{len(grouped_labels)}] Processing: {criterion}. Labels count: {len(labels)}")
 
-        tokens_num = 3000
-
         prompt = generate_prompt(criterion, labels)
         messages = [
             {"role": "system", "content": "You are a helpful assistant."},
             {"role": "user", "content": prompt}
         ]
         chat_prompt = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
-        response = query_llm(chat_prompt, tokens_num)
+        response = query_llm(chat_prompt)
         print("Trimmed response: \n", response)
 
         try:
