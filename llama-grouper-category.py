@@ -89,7 +89,7 @@ def query_llm(prompt):
     with torch.no_grad():
         outputs = model.generate(
             **inputs,
-            max_new_tokens=3000,           
+            max_new_tokens=16000,           
             temperature=None,               
             do_sample=False,
             #top_k=40,   
