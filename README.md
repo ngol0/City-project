@@ -1,2 +1,2 @@
-# FL project for computer vision task
+# Ongoing project with CitAI Research Center
 [under construction]
