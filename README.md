@@ -1,2 +1,2 @@
-# Federated Dataset Simulation project
+# FL project for computer vision task
 [under construction]
